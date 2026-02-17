@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  industry  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  products  Product[]
+  sales     Sale[]
+  forecasts Forecast[]
+  models    MLModel[]
+
+
+  @@index([name])
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String
+  password  String
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+
+  @@unique([email, companyId])
+  @@index([companyId])
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sku       String?
+  category  String?
+  price     Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  sales     Sale[]
+  forecasts Forecast[]
+
+  @@unique([name, companyId])
+  @@index([companyId])
+  @@index([name])
+}
+
+model Sale {
+  id        Int      @id @default(autoincrement())
+  quantity  Int
+  revenue   Float
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+
+  @@index([companyId])
+  @@index([productId])
+  @@index([date])
+  @@unique([productId, date, companyId])
+}
+
+model Forecast {
+  id         Int      @id @default(autoincrement())
+  predicted  Float
+  targetDate DateTime
+  createdAt  DateTime @default(now())
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  modelId   Int?
+  model     MLModel? @relation(fields: [modelId], references: [id])
+
+  @@index([companyId])
+  @@index([productId])
+  @@index([targetDate])
+  @@unique([productId, targetDate, companyId, modelId])
+}
+
+model MLModel {
+  id        Int      @id @default(autoincrement())
+  version   String
+  accuracy  Float?
+  createdAt DateTime @default(now())
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  forecasts Forecast[]
+
+  @@index([companyId])
+}
