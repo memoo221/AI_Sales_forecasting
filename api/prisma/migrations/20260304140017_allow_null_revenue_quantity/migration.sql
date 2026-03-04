@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Sale" ALTER COLUMN "quantity" DROP NOT NULL,
+ALTER COLUMN "revenue" DROP NOT NULL;

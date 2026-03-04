@@ -69,8 +69,8 @@ model Product {
 
 model Sale {
   id        Int      @id @default(autoincrement())
-  quantity  Int
-  revenue   Float
+  quantity  Int?
+  revenue   Float?
   date      DateTime
   createdAt DateTime @default(now())
 

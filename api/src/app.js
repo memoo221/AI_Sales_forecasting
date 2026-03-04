@@ -4,11 +4,15 @@ const prisma = require("./infrastructure/database/prisma");
 const authRoutes = require("./modules/auth/auth.route");
 const errorhandeler = require("./common/middleware/error.middleware.js");
 const cookieParser = require("cookie-parser");
+const productRoutes = require("./modules/product/product.route");
+const salesRoutes = require("./modules/sales/sales.route");
 const app = express();
 app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRoutes);
+app.use("/products", productRoutes);
+app.use("/sales", salesRoutes);
 app.use(errorhandeler);
 
 module.exports = app;

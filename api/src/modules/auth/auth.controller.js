@@ -1,8 +1,10 @@
 const authService = require('./auth.service');
-
+const { registerSchema, loginSchema, refreshSchema } = require('./auth.validation');
 const register = async (req, res,next ) => {
     try{
-        const { companyName, email, password } = req.body;
+        const validatedData = registerSchema.parse(req.body);
+        console.log("VALIDATION PASSED");
+        const { companyName, email, password } = validatedData;
         const tokens = await authService.register({ companyName, email, password });
         res.cookie("refreshToken", tokens.refreshToken, {
   httpOnly: true,
@@ -24,7 +26,8 @@ return res.status(201).json({
 
 const login = async (req, res,next) => {
     try{
-        const { email, password } = req.body;
+        const validatedData = loginSchema.parse(req.body);
+        const { email, password } = validatedData;
         const tokens = await authService.login({ email, password });
     res.cookie("refreshToken", tokens.refreshToken, {
   httpOnly: true,
