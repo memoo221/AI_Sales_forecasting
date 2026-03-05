@@ -1,6 +1,7 @@
 const prisma = require("../../infrastructure/database/prisma");
 const { parseFile } = require("../../common/utils/fileParser");
 const { analyzeDataset } = require("../../common/utils/columnMapper");
+const { triggerForecast, checkHealth } = require("../../common/utils/mlClient");
 
 const ingestSalesFile = async (buffer, originalname, companyId) => {
   // 1. Parse raw rows from file
@@ -113,6 +114,16 @@ const ingestSalesFile = async (buffer, originalname, companyId) => {
     }
   }
 
+  // 5. Trigger ML forecasting in the background (don't block the upload response)
+  const mlAvailable = await checkHealth();
+  let forecast = null;
+  if (mlAvailable) {
+    forecast = await triggerForecast(companyId).catch((err) => {
+      console.error("Forecast trigger failed:", err.message);
+      return null;
+    });
+  }
+
   return {
     total: rows.length,
     inserted,
@@ -122,6 +133,7 @@ const ingestSalesFile = async (buffer, originalname, companyId) => {
     mapping,
     issues,
     errors: errors.slice(0, 20),
+    forecast: forecast ?? { status: "ml service unavailable" },
   };
 };
 

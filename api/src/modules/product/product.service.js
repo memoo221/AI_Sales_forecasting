@@ -20,6 +20,11 @@ const getProducts = async (companyId, name) => {
         },
       }),
     },
+    include: {
+      forecasts: {
+        orderBy: { targetDate: "asc" },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 };

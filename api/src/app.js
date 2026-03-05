@@ -6,13 +6,15 @@ const errorhandeler = require("./common/middleware/error.middleware.js");
 const cookieParser = require("cookie-parser");
 const productRoutes = require("./modules/product/product.route");
 const salesRoutes = require("./modules/sales/sales.route");
+const assistantRoutes = require("./modules/assistant/assistant.route");
 const app = express();
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
 app.use("/sales", salesRoutes);
+app.use("/assistant", assistantRoutes);
 app.use(errorhandeler);
 
 module.exports = app;
